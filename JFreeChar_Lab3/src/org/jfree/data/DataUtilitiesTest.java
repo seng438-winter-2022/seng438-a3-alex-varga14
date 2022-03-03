@@ -59,7 +59,7 @@ public class DataUtilitiesTest
 	 }
 	 
 	 //Test expects NULL
-	 @Test (expected = NullPointerException.class)
+	 @Test (expected = IllegalArgumentException.class)
 	 public void testCalculateColumnTotalNullInput(){
 	     final Values2D values = null;
 	     double result = DataUtilities.calculateColumnTotal(values, 0);
@@ -89,25 +89,155 @@ public class DataUtilitiesTest
 	 
 	 
 	 @Test
-	 public void testCalculateRowTotalForOneValue(){
-		// Setup Mockery and JMock context with interface
-	     Mockery mockingContext = new Mockery();
-	     final Values2D values = mockingContext.mock(Values2D.class);
-	     // Initialize Mock expectations
-	     mockingContext.checking(new Expectations() {
-	         {
-	             one(values).getColumnCount();
-	             will(returnValue(2));
-	             one(values).getValue(0, 0);
-	             will(returnValue(7.5));
-	         }
-	     });
-	     // exercise	
-	     double result = DataUtilities.calculateRowTotal(values, 0);
-	     // verify
-	     assertEquals(result, 7.5, .000000001d);
-	     // tear-down: NONE in this test method
-	 }
+     public void testCalculateRowTotalThreeArgsNoMocking() {
+         /*
+          * tests the version of calculateRowTotal that takes in
+          * Values2D data, int row, int[] validCols as arguments
+          * 
+          * 
+          * The expected output of this is the following sum:
+          * 35 + 90 + 5 + 10 = 140
+         */
+         int[] validColumns = {0, 2, 4, 5};
+         Integer key;
+         Integer row0 = Integer.valueOf(0);
+         Integer value;
+         DefaultKeyedValues2D test = new DefaultKeyedValues2D();
+         key = Integer.valueOf(0);
+         value = Integer.valueOf(35);
+         test.addValue(value, row0, key);
+         key = Integer.valueOf(1);
+         value = Integer.valueOf(8);
+         test.addValue(value, row0, key);
+         key = Integer.valueOf(2);
+         value = Integer.valueOf(90);
+         test.addValue(value, row0, key);
+         key = Integer.valueOf(3);
+         value = Integer.valueOf(45);
+         test.addValue(value, row0, key);
+         key = Integer.valueOf(4);
+         value = Integer.valueOf(5);
+         test.addValue(value, row0, key);
+         key = Integer.valueOf(5);
+         value = Integer.valueOf(10);
+         test.addValue(value, row0, key);
+
+         double expected = 35 + 90 + 5 + 10;
+         double returnVal = DataUtilities.calculateRowTotal(test, 0, validColumns);
+         boolean testBool = (expected == returnVal);
+
+
+         assertTrue("The sum should be 140 because the valid columns contain the following numbers "
+                 + "35, 90, 5, 10", testBool);
+
+     } 
+
+	 
+	 @Test
+	    public void testValidCalculateColumnTotalAll() {
+	        // Setup Mockery and JMock context with interface
+	         Mockery mockingContext = new Mockery();
+	         
+	         final Values2D values = mockingContext.mock(Values2D.class);
+	         
+	         // Initialize Mock expectations
+	         mockingContext.checking(new org.jmock.Expectations() {
+	             {
+	                 oneOf(values).getRowCount();
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(0, 0);
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(1, 0);
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(2, 0);
+	                 will(returnValue(1));
+	             }
+	         });
+	         
+	         int[] ref = {0, 1, 2};
+	         double total = DataUtilities.calculateColumnTotal(values, 0, ref);
+	         
+	         assertEquals(3, total, .000000001d);
+	        
+	    }
+	    
+	    @Test
+	    public void testValidCalculateColumnTotalNone() {
+	        // Setup Mockery and JMock context with interface
+	         Mockery mockingContext = new Mockery();
+	         
+	         final Values2D values = mockingContext.mock(Values2D.class);
+	         
+	         // Initialize Mock expectations
+	         mockingContext.checking(new Expectations() {
+	             {
+	                 oneOf(values).getRowCount();
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(0, 0);
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(1, 0);
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(2, 0);
+	                 will(returnValue(1));
+	             }
+	         });
+	         
+	         int[] ref = {};
+	         double total = DataUtilities.calculateColumnTotal(values, 0, ref);
+	         
+	         assertEquals(0, total, .000000001d);
+	        
+	    }
+	    
+	    @Test
+	    public void testValidCalculateColumnTotalTwoValues() {
+	        // Setup Mockery and JMock context with interface
+	         Mockery mockingContext = new Mockery();
+	         
+	         final Values2D values = mockingContext.mock(Values2D.class);
+	         
+	         // Initialize Mock expectations
+	         mockingContext.checking(new org.jmock.Expectations() {
+	             {
+	                 oneOf(values).getRowCount();
+	                 will(returnValue(3));
+	                 oneOf(values).getValue(0, 0);
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(1, 0);
+	                 will(returnValue(1));
+	                 oneOf(values).getValue(2, 0);
+	                 will(returnValue(1));
+	             }
+	         });
+	         
+	         int[] ref = {0, 2};
+	         double total = DataUtilities.calculateColumnTotal(values, 0, ref);
+	         
+	         assertEquals(2, total, .000000001d);
+	        
+	    }
+	 
+	 
+	    @Test
+		 public void testCalculateRowTotalForOneValue(){
+			// Setup Mockery and JMock context with interface
+		     Mockery mockingContext = new Mockery();
+		     final Values2D values = mockingContext.mock(Values2D.class);
+//		     // Initialize Mock expectations
+		     mockingContext.checking(new Expectations() {
+		         {
+		             oneOf(values).getColumnCount();
+		             will(returnValue(1));
+		             oneOf(values).getValue(0, 0);
+		             will(returnValue(7.5));
+		         }
+		     });
+		     // exercise	
+		     double result = DataUtilities.calculateRowTotal(values, 0);
+		     // verify
+		     assertEquals(result, 7.5, .000000001d);
+		     // tear-down: NONE in this test method
+		 }
 	 
 	 @Test
 	 public void testCalculateRowTotalTwoValueFalse(){
@@ -222,7 +352,7 @@ public class DataUtilitiesTest
 			
 			contextMock.checking(new Expectations() {{  
 				
-				one(mock).getItemCount(); //Get itemCount
+				oneOf(mock).getItemCount(); //Get itemCount
 				will(returnValue(3));
 				
 				/*
@@ -230,20 +360,24 @@ public class DataUtilitiesTest
 				 * the values for the sum of all the values, it is the denominator for calculating
 				 * the percentages ( % = (numerator)/ (sum of all values)  )
 				 */
-				one(mock).getValue(1); //Get Value
+				oneOf(mock).getValue(0); //Get Value
 				will(returnValue(10));
 				
-				one(mock).getItemCount(); //Get itemCount
+				oneOf(mock).getItemCount(); //Get itemCount
 				will(returnValue(3));
 				
-				one(mock).getValue(2); //Get Value
+				oneOf(mock).getValue(1); //Get Value
 				will(returnValue(10));
 				
-				one(mock).getItemCount(); //Get itemCount
+				oneOf(mock).getItemCount(); //Get itemCount
 				will(returnValue(3));
 				
-				one(mock).getItemCount(); //Get itemCount
+				oneOf(mock).getValue(2);
+				will(returnValue(10));
+				
+				oneOf(mock).getItemCount(); //Get itemCount
 				will(returnValue(3));
+				
 				
 				/*
 				 * Second set of getValue calls. These are responsible for providing the 
@@ -254,6 +388,9 @@ public class DataUtilitiesTest
 				 * 			@ index 1: ( % = ( [Value in index 0] + [Value in index 1] ) / (Sum of all values) )
 				 * 			@ index 2 : ( % = ( [Value in index 0] + [Value in index 1] + [Value in index 2] ) / (Sum of all values) )
 				 */
+				oneOf(mock).getItemCount(); //Get itemCount
+				will(returnValue(3));
+				
 				one(mock).getValue(0); //Get Value
 				will(returnValue(10)); 
 				
@@ -438,5 +575,94 @@ public class DataUtilitiesTest
 	        
 	        assertNotNull("Expected Not Null but got Null", dubArray);
 	    }
+		
+		@Test
+		public void testGetCumulativePercentagesDoesItWorkNoMocking() {
+			//Tests the getCumulativePercentages() function without using JMock
+			
+			/*
+			 * Set-up
+			 * 
+			 * Since KeyedValues is an interface, we use a class that implements it; in this case, we use DefaultKeyedValues
+			 * We then add numbers to indexes 0, 1, and 2
+			 * Each index will be filled with the number 10
+			 * 
+			 * This what getCumulativePercentages() should return
+			 * 
+			 * index:   value:
+			 * 0        10/30  (0.333333)
+			 * 
+			 * 1        20/30  (0.666666)
+			 * 
+			 * 2        30/30  (1.000000)
+			 */
+			Integer key;
+			DefaultKeyedValues test = new DefaultKeyedValues();
+			key = Integer.valueOf(0);
+			test.addValue(key, 10);
+			key = Integer.valueOf(1);
+			test.addValue(key, 10);
+			key = Integer.valueOf(2);
+			test.addValue(key, 10);
+			
+			KeyedValues returnVal = DataUtilities.getCumulativePercentages(test);
+			double num1 = 10;
+			double num2 = 20;
+			double num3 = 30;
+			double first = num1/num3;
+			double second = num2/num3;
+			double third = num3/num3;
+			double expectedValues[] = { first, second, third };
+			for(int i = 0;i < 3;i++) {
+				Double expected = Double.valueOf(expectedValues[i]);
+				Double actual = returnVal.getValue(i).doubleValue();
+				assertEquals("Cumulative Percentages not calculated correctly", expected, actual);
+			}
+		}
+		
+		@Test
+		public void testGetCumulativePercentagesNullElementsInKeyedValuesObjectNoMocking() {
+			//Tests the getCumulativePercentages() function without using JMock
+			
+			/*
+			 * Set-up
+			 * 
+			 * Since KeyedValues is an interface, we use a class that implements it; in this case, we use DefaultKeyedValues
+			 * We then add numbers to indexes 0, 1, and 2
+			 * Each index will be filled with the number 10, except for index 1, which contains a null value
+			 * 
+			 * This what getCumulativePercentages() should return
+			 * 
+			 * index:   value:
+			 * 0        10/20  (0.5)
+			 * 
+			 * 1        10/20  (0.5)
+			 * 
+			 * 2        20/20  (1.0)
+			 */
+			Integer key;
+			DefaultKeyedValues test = new DefaultKeyedValues();
+			key = Integer.valueOf(0);
+			test.addValue(key, 10);
+			key = Integer.valueOf(1);
+			test.addValue(key, null);
+			key = Integer.valueOf(2);
+			test.addValue(key, 10);
+			
+			KeyedValues returnVal = DataUtilities.getCumulativePercentages(test);
+			double num1 = 10;
+			double num2 = 20;
+			double first = num1/num2;
+			double second = num1/num2;
+			double third = num2/num2;
+			double expectedValues[] = { first, second, third };
+			
+			for(int i = 0;i < 3;i++) {
+				Double expected = Double.valueOf(expectedValues[i]);
+				Double actual = returnVal.getValue(i).doubleValue();
+				assertEquals("Cumulative Percentages not calculated correctly", expected, actual);
+			}
+			
+		}
 
 }
